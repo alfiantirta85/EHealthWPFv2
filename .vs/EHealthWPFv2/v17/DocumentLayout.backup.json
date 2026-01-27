@@ -1,0 +1,52 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\alfian\\kuliah\\pemrogramanVisual\\EHealthWPFv2\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{55F2A0F0-1D98-484D-9471-9A26CDA9FC64}|EHealthWPFv2\\EHealthWPFv2.vbproj|c:\\users\\alfian\\kuliah\\pemrogramanvisual\\ehealthwpfv2\\ehealthwpfv2\\mainwindow.xaml.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{55F2A0F0-1D98-484D-9471-9A26CDA9FC64}|EHealthWPFv2\\EHealthWPFv2.vbproj|solutionrelative:ehealthwpfv2\\mainwindow.xaml.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{55F2A0F0-1D98-484D-9471-9A26CDA9FC64}|EHealthWPFv2\\EHealthWPFv2.vbproj|c:\\users\\alfian\\kuliah\\pemrogramanvisual\\ehealthwpfv2\\ehealthwpfv2\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{55F2A0F0-1D98-484D-9471-9A26CDA9FC64}|EHealthWPFv2\\EHealthWPFv2.vbproj|solutionrelative:ehealthwpfv2\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\alfian\\kuliah\\pemrogramanVisual\\EHealthWPFv2\\EHealthWPFv2\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "EHealthWPFv2\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\alfian\\kuliah\\pemrogramanVisual\\EHealthWPFv2\\EHealthWPFv2\\MainWindow.xaml",
+              "RelativeToolTip": "EHealthWPFv2\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-01-16T15:24:19.924Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainWindow.xaml.vb",
+              "DocumentMoniker": "C:\\Users\\alfian\\kuliah\\pemrogramanVisual\\EHealthWPFv2\\EHealthWPFv2\\MainWindow.xaml.vb",
+              "RelativeDocumentMoniker": "EHealthWPFv2\\MainWindow.xaml.vb",
+              "ToolTip": "C:\\Users\\alfian\\kuliah\\pemrogramanVisual\\EHealthWPFv2\\EHealthWPFv2\\MainWindow.xaml.vb",
+              "RelativeToolTip": "EHealthWPFv2\\MainWindow.xaml.vb",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAuwBkAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-16T15:24:18.443Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
