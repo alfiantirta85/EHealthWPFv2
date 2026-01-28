@@ -1,27 +1,13 @@
-﻿' ========================================
-' FILE: MainWindow.xaml.vb
-' APLIKASI E-HEALTH WPF VERSION
-' ========================================
-
-Imports System.IO
+﻿Imports System.IO
 Imports System.Text
 Imports System.Collections.ObjectModel
 
 Class MainWindow
-    ' ========================================
-    ' DEKLARASI VARIABEL GLOBAL
-    ' ========================================
-
-    ' ObservableCollection untuk binding ke DataGrid (WPF specific)
     Private dataPasien As New ObservableCollection(Of Pasien)
     Private sedangEdit As Boolean = False
     Private indexEdit As Integer = -1
 
-    ' ========================================
-    ' CLASS PASIEN (dengan properties untuk binding)
-    ' ========================================
     Public Class Pasien
-        ' Properties dasar
         Public Property ID As String
         Public Property Nama As String
         Public Property TanggalLahir As Date
@@ -31,14 +17,13 @@ Class MainWindow
         Public Property Diagnosa As String
         Public Property TanggalDaftar As Date
 
-        ' Properties computed untuk tampilan di DataGrid
         Public ReadOnly Property TanggalLahirStr As String
             Get
                 Return TanggalLahir.ToString("dd/MM/yyyy")
             End Get
         End Property
 
-        Public ReadOnly Property TanggalDaftarStr As String
+        Public ReadOnly Property TanggalDaftasrStr As String
             Get
                 Return TanggalDaftar.ToString("dd/MM/yyyy")
             End Get
@@ -46,11 +31,10 @@ Class MainWindow
 
         Public ReadOnly Property UmurStr As String
             Get
-                Return HitungUmur().ToString() & " th"
+                Return HitungUmur().ToString()
             End Get
         End Property
 
-        ' Constructor
         Public Sub New(id As String, nama As String, tglLahir As Date,
                        jk As String, alamat As String, telp As String,
                        diagnosa As String, tglDaftar As Date)
@@ -64,7 +48,6 @@ Class MainWindow
             Me.TanggalDaftar = tglDaftar
         End Sub
 
-        ' Method menghitung umur
         Public Function HitungUmur() As Integer
             Dim umur As Integer = Date.Now.Year - TanggalLahir.Year
             If Date.Now < TanggalLahir.AddYears(umur) Then
@@ -74,22 +57,15 @@ Class MainWindow
         End Function
     End Class
 
-    ' ========================================
-    ' EVENT WINDOW LOADED
-    ' ========================================
     Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        ' Set default tanggal
         dtpTanggalLahir.SelectedDate = New Date(2000, 1, 1)
         dtpTanggalDaftar.SelectedDate = Date.Now
 
-        ' Bind data ke DataGrid (WPF specific)
         dgvPasien.ItemsSource = dataPasien
 
-        ' Load data dari file
         MuatDataDariFile()
         UpdateJumlahPasien()
 
-        ' Event handlers untuk buttons (WPF style)
         AddHandler btnTambah.Click, AddressOf btnTambah_Click
         AddHandler btnEdit.Click, AddressOf btnEdit_Click
         AddHandler btnHapus.Click, AddressOf btnHapus_Click
@@ -97,10 +73,6 @@ Class MainWindow
         AddHandler btnBersihkan.Click, AddressOf btnBersihkan_Click
         AddHandler btnCetak.Click, AddressOf btnCetak_Click
     End Sub
-
-    ' ========================================
-    ' VALIDASI INPUT
-    ' ========================================
 
     Private Function ValidasiInput(ByRef pesanError As String) As Boolean
         If String.IsNullOrWhiteSpace(txtNama.Text) Then
@@ -144,7 +116,6 @@ Class MainWindow
             Return False
         End If
 
-        ' Cek duplikasi ID
         For i As Integer = 0 To dataPasien.Count - 1
             If sedangEdit AndAlso i = indexEdit Then
                 Continue For
@@ -160,10 +131,6 @@ Class MainWindow
         Return True
     End Function
 
-    ' ========================================
-    ' BUTTON EVENT HANDLERS
-    ' ========================================
-
     Private Sub btnTambah_Click(sender As Object, e As RoutedEventArgs)
         Try
             Dim pesanError As String = ""
@@ -175,7 +142,6 @@ Class MainWindow
             End If
 
             If sedangEdit Then
-                ' Update mode
                 dataPasien(indexEdit).Nama = txtNama.Text.Trim()
                 dataPasien(indexEdit).TanggalLahir = dtpTanggalLahir.SelectedDate.Value
                 dataPasien(indexEdit).JenisKelamin = CType(cboJenisKelamin.SelectedItem, ComboBoxItem).Content.ToString()
@@ -184,13 +150,11 @@ Class MainWindow
                 dataPasien(indexEdit).Diagnosa = txtDiagnosa.Text.Trim()
                 dataPasien(indexEdit).TanggalDaftar = dtpTanggalDaftar.SelectedDate.Value
 
-                ' Refresh DataGrid (WPF specific)
                 dgvPasien.Items.Refresh()
 
                 MessageBox.Show("Data berhasil diupdate!", "Sukses",
                               MessageBoxButton.OK, MessageBoxImage.Information)
             Else
-                ' Tambah mode
                 Dim pasienBaru As New Pasien(
                     txtID.Text.Trim(),
                     txtNama.Text.Trim(),
@@ -220,23 +184,19 @@ Class MainWindow
 
     Private Sub btnEdit_Click(sender As Object, e As RoutedEventArgs)
         Try
-            ' Cek apakah ada data yang dipilih (WPF style)
             If dgvPasien.SelectedItem Is Nothing Then
                 MessageBox.Show("Pilih data yang akan diedit!", "Peringatan",
                               MessageBoxButton.OK, MessageBoxImage.Warning)
                 Return
             End If
 
-            ' Ambil data yang dipilih
             Dim pasienDipilih As Pasien = CType(dgvPasien.SelectedItem, Pasien)
             indexEdit = dataPasien.IndexOf(pasienDipilih)
 
-            ' Isi form dengan data yang dipilih
             txtID.Text = pasienDipilih.ID
             txtNama.Text = pasienDipilih.Nama
             dtpTanggalLahir.SelectedDate = pasienDipilih.TanggalLahir
 
-            ' Set ComboBox (WPF specific)
             For i As Integer = 0 To cboJenisKelamin.Items.Count - 1
                 Dim item As ComboBoxItem = CType(cboJenisKelamin.Items(i), ComboBoxItem)
                 If item.Content.ToString() = pasienDipilih.JenisKelamin Then
@@ -250,7 +210,6 @@ Class MainWindow
             txtDiagnosa.Text = pasienDipilih.Diagnosa
             dtpTanggalDaftar.SelectedDate = pasienDipilih.TanggalDaftar
 
-            ' Set mode edit
             sedangEdit = True
             txtID.IsEnabled = False
             btnTambah.Content = "Update Data"
@@ -269,7 +228,6 @@ Class MainWindow
                 Return
             End If
 
-            ' Konfirmasi hapus (WPF style)
             Dim hasil As MessageBoxResult = MessageBox.Show(
                 "Apakah Anda yakin ingin menghapus data ini?",
                 "Konfirmasi Hapus",
@@ -299,20 +257,17 @@ Class MainWindow
             Dim keyword As String = txtCari.Text.Trim().ToLower()
 
             If String.IsNullOrWhiteSpace(keyword) Then
-                ' Tampilkan semua data
                 dgvPasien.ItemsSource = dataPasien
                 UpdateJumlahPasien()
                 Return
             End If
 
-            ' Filter data (LINQ - WPF specific)
             Dim hasilCari = From p In dataPasien
                             Where p.ID.ToLower().Contains(keyword) OrElse
                                   p.Nama.ToLower().Contains(keyword) OrElse
                                   p.Diagnosa.ToLower().Contains(keyword)
                             Select p
 
-            ' Bind hasil pencarian
             dgvPasien.ItemsSource = hasilCari.ToList()
             lblJumlah.Text = "Ditemukan: " & hasilCari.Count() & " data"
 
@@ -384,10 +339,6 @@ Class MainWindow
         End Try
     End Sub
 
-    ' ========================================
-    ' FUNGSI HELPER
-    ' ========================================
-
     Private Sub UpdateJumlahPasien()
         lblJumlah.Text = "Total Pasien: " & dataPasien.Count
     End Sub
@@ -409,10 +360,6 @@ Class MainWindow
 
         txtNama.Focus()
     End Sub
-
-    ' ========================================
-    ' FILE I/O
-    ' ========================================
 
     Private Sub SimpanDataKeFile()
         Try
@@ -477,5 +424,4 @@ Class MainWindow
                           MessageBoxButton.OK, MessageBoxImage.Error)
         End Try
     End Sub
-
 End Class
