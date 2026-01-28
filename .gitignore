@@ -1,0 +1,9 @@
+[Bb]in/
+[Dd]ebug/
+[Oo]bj/
+[Rr]elease/
+[Rr]eleases/
+.vs/
+
+*.[Cc]ache
+!*.[Cc]ache/
