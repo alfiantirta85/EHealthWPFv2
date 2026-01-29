@@ -1,11 +1,12 @@
-﻿Imports System.IO
+﻿Imports System.Collections.ObjectModel
+Imports System.IO
 Imports System.Text
-Imports System.Collections.ObjectModel
 
 Class MainWindow
     Private dataPasien As New ObservableCollection(Of Pasien)
     Private sedangEdit As Boolean = False
     Private indexEdit As Integer = -1
+
 
     Public Class Pasien
         Public Property ID As String
@@ -35,6 +36,15 @@ Class MainWindow
             End Get
         End Property
 
+
+        Public Function HitungUmur() As Integer
+            Dim umur As Integer = Date.Now.Year - TanggalLahir.Year
+            If Date.Now < TanggalLahir.AddYears(umur) Then
+                umur -= 1
+            End If
+            Return umur
+        End Function
+
         Public Sub New(id As String, nama As String, tglLahir As Date,
                        jk As String, alamat As String, telp As String,
                        diagnosa As String, tglDaftar As Date)
@@ -48,13 +58,6 @@ Class MainWindow
             Me.TanggalDaftar = tglDaftar
         End Sub
 
-        Public Function HitungUmur() As Integer
-            Dim umur As Integer = Date.Now.Year - TanggalLahir.Year
-            If Date.Now < TanggalLahir.AddYears(umur) Then
-                umur -= 1
-            End If
-            Return umur
-        End Function
     End Class
 
     Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
@@ -65,54 +68,59 @@ Class MainWindow
 
         MuatDataDariFile()
         UpdateJumlahPasien()
+    End Sub
 
-        AddHandler btnTambah.Click, AddressOf btnTambah_Click
-        AddHandler btnEdit.Click, AddressOf btnEdit_Click
-        AddHandler btnHapus.Click, AddressOf btnHapus_Click
-        AddHandler btnCari.Click, AddressOf btnCari_Click
-        AddHandler btnBersihkan.Click, AddressOf btnBersihkan_Click
-        AddHandler btnCetak.Click, AddressOf btnCetak_Click
+    Shared Sub ValidasiMessageBox(msg As String)
+        MessageBox.Show(
+                "Validasi form",
+                msg,
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
+            )
     End Sub
 
     Private Function ValidasiInput(ByRef pesanError As String) As Boolean
+
+
         If String.IsNullOrWhiteSpace(txtNama.Text) Then
-            pesanError = "Nama pasien harus diisi!"
+            ValidasiMessageBox("Nama pasien harus diisi!")
             txtNama.Focus()
             Return False
         End If
 
         If String.IsNullOrWhiteSpace(txtID.Text) Then
-            pesanError = "ID Pasien harus diisi!"
+            ValidasiMessageBox("ID Pasien harus diisi!")
             txtID.Focus()
             Return False
         End If
 
         If String.IsNullOrWhiteSpace(txtAlamat.Text) Then
-            pesanError = "Alamat harus diisi!"
+            ValidasiMessageBox("Alamat harus diisi!")
             txtAlamat.Focus()
             Return False
         End If
 
         If String.IsNullOrWhiteSpace(txtTelepon.Text) Then
-            pesanError = "Nomor telepon harus diisi!"
+            ValidasiMessageBox("Nomor telepon harus diisi!")
             txtTelepon.Focus()
             Return False
         End If
 
         If String.IsNullOrWhiteSpace(txtDiagnosa.Text) Then
-            pesanError = "Diagnosa harus diisi!"
+            ValidasiMessageBox("Diagnosa harus diisi!")
             txtDiagnosa.Focus()
             Return False
         End If
 
-        ' Validasi tanggal
         If Not dtpTanggalLahir.SelectedDate.HasValue Then
-            pesanError = "Tanggal lahir harus diisi!"
+            ValidasiMessageBox("Tanggal lahir harus diisi!")
+			dtpTanggalLahir.Focus()
             Return False
         End If
 
         If Not dtpTanggalDaftar.SelectedDate.HasValue Then
-            pesanError = "Tanggal daftar harus diisi!"
+            ValidasiMessageBox("Tanggal daftar harus diisi!")
+			dtpTanggalDaftar.Focus()
             Return False
         End If
 
@@ -131,7 +139,7 @@ Class MainWindow
         Return True
     End Function
 
-    Private Sub btnTambah_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnTambah_Click(sender As Object, e As RoutedEventArgs) Handles btnTambah.Click
         Try
             Dim pesanError As String = ""
 
@@ -182,7 +190,7 @@ Class MainWindow
         End Try
     End Sub
 
-    Private Sub btnEdit_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnEdit_Click(sender As Object, e As RoutedEventArgs) Handles btnEdit.Click
         Try
             If dgvPasien.SelectedItem Is Nothing Then
                 MessageBox.Show("Pilih data yang akan diedit!", "Peringatan",
@@ -220,7 +228,7 @@ Class MainWindow
         End Try
     End Sub
 
-    Private Sub btnHapus_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnHapus_Click(sender As Object, e As RoutedEventArgs) Handles btnHapus.Click
         Try
             If dgvPasien.SelectedItem Is Nothing Then
                 MessageBox.Show("Pilih data yang akan dihapus!", "Peringatan",
@@ -252,7 +260,7 @@ Class MainWindow
         End Try
     End Sub
 
-    Private Sub btnCari_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnCari_Click(sender As Object, e As RoutedEventArgs) Handles btnCari.Click
         Try
             Dim keyword As String = txtCari.Text.Trim().ToLower()
 
@@ -277,14 +285,14 @@ Class MainWindow
         End Try
     End Sub
 
-    Private Sub btnBersihkan_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnBersihkan_Click(sender As Object, e As RoutedEventArgs) Handles btnBersihkan.Click
         BersihkanForm()
         txtCari.Text = ""
         dgvPasien.ItemsSource = dataPasien
         UpdateJumlahPasien()
     End Sub
 
-    Private Sub btnCetak_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnCetak_Click(sender As Object, e As RoutedEventArgs) Handles btnCetak.Click
         Try
             Dim namaFile As String = "Laporan_Pasien_" &
                                     Date.Now.ToString("yyyyMMdd_HHmmss") & ".txt"
