@@ -7,7 +7,7 @@
     Width="1000"
     WindowStartupLocation="CenterScreen" Background="#FFF9F8F6"
 >
-    <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="#FFF9F8F6" RenderTransformOrigin="0.5,0.5" MinHeight="700" MinWidth="940" Margin="5,5,5,5">
+    <TabControl x:Name="MainTab" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="#FFF9F8F6" RenderTransformOrigin="0.5,0.5" MinHeight="700" MinWidth="940" Margin="5,5,5,5">
         <TabControl.Resources>
             <Style TargetType="TabItem">
                 <Setter Property="Template">
@@ -216,7 +216,7 @@
                             Grid.Row="5" 
                             Grid.Column="0" 
                             Grid.ColumnSpan="4" 
-                            x:Name="txtDiagnosa_Copy" 
+                            x:Name="txtKeluhan" 
                             TextWrapping="Wrap" 
                             AcceptsReturn="True" 
                             VerticalScrollBarVisibility="Auto" 
@@ -265,8 +265,64 @@
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="30,10,30,10">
                     <Button x:Name="btnTambah" Content="Tambah Data" Width="120" Height="35" Margin="0,0,10,0" Background="#FFC9B59C" Foreground="White" FontWeight="Bold"/>
-                    <Button x:Name="btnEdit" Content="Edit Data" Width="120" Height="35" Margin="0,0,10,0" Background="#FFC9B59C" Foreground="White" FontWeight="Bold"/>
-                    <Button x:Name="btnHapus" Content="Hapus Data" Width="120" Height="35" Margin="0,0,10,0" Background="#FFC9B59C" Foreground="White" FontWeight="Bold"/>
+                    <Button x:Name="btnEdit" Content="Edit Data" Width="120" Height="35" Margin="0,0,10,0" Foreground="White" FontWeight="Bold">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#FFC9B59C" />
+
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border 
+                                                x:Name="Border"
+                                                Background="{TemplateBinding Background}"
+                                            >
+                                                <ContentPresenter 
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Border"
+                                                        Property="Background" 
+                                                        Value="#ffa8a29b" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button x:Name="btnHapus" Content="Hapus Data" Width="120" Height="35" Margin="0,0,10,0" Foreground="White" FontWeight="Bold">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#FFC9B59C" />
+
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border 
+                                                x:Name="Border"
+                                                Background="{TemplateBinding Background}">
+                                                <ContentPresenter 
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter 
+                                                        TargetName="Border"
+                                                        Property="Background" 
+                                                        Value="#ffa8a29b" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                     <Button x:Name="btnBersihkan" Content="Bersihkan" Width="120" Height="35" Margin="0,0,10,0" Background="#FFC9B59C" Foreground="White" FontWeight="Bold"/>
                     <Button x:Name="btnCetak" Content="Cetak Laporan" Width="140" Height="35" Background="#FFC9B59C" Foreground="White" FontWeight="Bold"/>
                 </StackPanel>
@@ -315,15 +371,15 @@
                     AlternatingRowBackground="#ECF0F1" Grid.ColumnSpan="2"
                 >
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID Pasien" Binding="{Binding ID}" Width="80"/>
-                        <DataGridTextColumn Header="Nama Lengkap" Binding="{Binding Nama}" Width="150"/>
-                        <DataGridTextColumn Header="Tgl Lahir" Binding="{Binding TanggalLahirStr}" Width="100"/>
+                        <DataGridTextColumn Header="ID pasien" Binding="{Binding ID}" Width="80"/>
+                        <DataGridTextColumn Header="Nama lengkap" Binding="{Binding Nama}" Width="150"/>
+                        <DataGridTextColumn Header="Tanggal lahir" Binding="{Binding TanggalLahirStr}" Width="100"/>
                         <DataGridTextColumn Header="Umur" Binding="{Binding UmurStr}" Width="60"/>
-                        <DataGridTextColumn Header="Jenis Kelamin" Binding="{Binding JenisKelamin}" Width="110"/>
+                        <DataGridTextColumn Header="Jenis kelamin" Binding="{Binding JenisKelamin}" Width="110"/>
                         <DataGridTextColumn Header="Alamat" Binding="{Binding Alamat}" Width="*"/>
                         <DataGridTextColumn Header="Telepon" Binding="{Binding Telepon}" Width="120"/>
                         <DataGridTextColumn Header="Diagnosa" Binding="{Binding Diagnosa}" Width="150"/>
-                        <DataGridTextColumn Header="Tgl Daftar" Binding="{Binding TanggalDaftarStr}" Width="100"/>
+                        <DataGridTextColumn Header="Tl Daftar" Binding="{Binding TanggalDaftarStr}" Width="100"/>
                     </DataGrid.Columns>
                 </DataGrid>
 

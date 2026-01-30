@@ -13,8 +13,11 @@ Class MainWindow
         Public Property Nama As String
         Public Property TanggalLahir As Date
         Public Property JenisKelamin As String
+        Public Property BeratBadan As Double
+        Public Property TinggiBadan As Double
         Public Property Alamat As String
-        Public Property Telepon As String
+        Public Property Telepon As Double
+        Public Property Keluhan As String
         Public Property Diagnosa As String
         Public Property TanggalDaftar As Date
 
@@ -24,7 +27,7 @@ Class MainWindow
             End Get
         End Property
 
-        Public ReadOnly Property TanggalDaftasrStr As String
+        Public ReadOnly Property TanggalDaftarStr As String
             Get
                 Return TanggalDaftar.ToString("dd/MM/yyyy")
             End Get
@@ -45,17 +48,30 @@ Class MainWindow
             Return umur
         End Function
 
-        Public Sub New(id As String, nama As String, tglLahir As Date,
-                       jk As String, alamat As String, telp As String,
-                       diagnosa As String, tglDaftar As Date)
+        Public Sub New(
+            id As String,
+            nama As String,
+            tglLahir As Date,
+            jk As String,
+            bb As Double,
+            tb As Double,
+            alamat As String,
+            telp As Double,
+            keluhan As String,
+            diagnosa As String,
+            tglDaftar As Date
+        )
             Me.ID = id
             Me.Nama = nama
-            Me.TanggalLahir = tglLahir
-            Me.JenisKelamin = jk
+            TanggalLahir = tglLahir
+            JenisKelamin = jk
+            TinggiBadan = tb
+            BeratBadan = bb
             Me.Alamat = alamat
-            Me.Telepon = telp
+            Telepon = telp
+            Me.Keluhan = keluhan
             Me.Diagnosa = diagnosa
-            Me.TanggalDaftar = tglDaftar
+            TanggalDaftar = tglDaftar
         End Sub
 
     End Class
@@ -63,6 +79,9 @@ Class MainWindow
     Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         dtpTanggalDaftar.SelectedDate = Nothing
         dtpTanggalLahir.SelectedDate = Nothing
+
+        btnEdit.IsEnabled = False
+        btnHapus.IsEnabled = False
 
         dgvPasien.ItemsSource = dataPasien
 
@@ -114,13 +133,13 @@ Class MainWindow
 
         If Not dtpTanggalLahir.SelectedDate.HasValue Then
             ValidasiMessageBox("Tanggal lahir harus diisi!")
-			dtpTanggalLahir.Focus()
+            dtpTanggalLahir.Focus()
             Return False
         End If
 
         If Not dtpTanggalDaftar.SelectedDate.HasValue Then
             ValidasiMessageBox("Tanggal daftar harus diisi!")
-			dtpTanggalDaftar.Focus()
+            dtpTanggalDaftar.Focus()
             Return False
         End If
 
@@ -168,8 +187,11 @@ Class MainWindow
                     txtNama.Text.Trim(),
                     dtpTanggalLahir.SelectedDate.Value,
                     CType(cboJenisKelamin.SelectedItem, ComboBoxItem).Content.ToString(),
+                    Double.Parse(txtBerat.Text),
+                    Double.Parse(txtTinggi.Text),
                     txtAlamat.Text.Trim(),
                     txtTelepon.Text.Trim(),
+                    txtKeluhan.Text,
                     txtDiagnosa.Text.Trim(),
                     dtpTanggalDaftar.SelectedDate.Value
                 )
@@ -421,7 +443,10 @@ Class MainWindow
                             data(4),
                             data(5),
                             data(6),
-                            Date.Parse(data(7))
+                            data(7),
+                            data(8),
+                            data(9),
+                            Date.Parse(data(10))
                         )
 
                         dataPasien.Add(pasien)
@@ -433,5 +458,38 @@ Class MainWindow
             MessageBox.Show("Error memuat data: " & ex.Message, "Error",
                           MessageBoxButton.OK, MessageBoxImage.Error)
         End Try
+    End Sub
+
+    Private Sub dgvPasien_SelectionChanged(sender As Object, e As EventArgs) Handles dgvPasien.SelectionChanged
+        If dgvPasien.SelectedItem Is Nothing Then Exit Sub
+
+        Dim dataPasien As Pasien = CType(dgvPasien.SelectedItem, Pasien)
+
+        btnEdit.IsEnabled = True
+        btnHapus.IsEnabled = True
+
+        txtID.Text = dataPasien.ID
+        txtNama.Text = dataPasien.Nama
+        dtpTanggalLahir.SelectedDate = dataPasien.TanggalLahir
+        cboJenisKelamin.SelectedItem = dataPasien.JenisKelamin
+        txtBerat.Text = dataPasien.BeratBadan.ToString()
+        txtTinggi.Text = dataPasien.TinggiBadan.ToString()
+        txtAlamat.Text = dataPasien.Alamat
+        txtTelepon.Text = dataPasien.Telepon.ToString()
+        txtKeluhan.Text = dataPasien.Keluhan
+        txtDiagnosa.Text = dataPasien.Diagnosa
+        dtpTanggalDaftar.SelectedDate = dataPasien.TanggalDaftar
+    End Sub
+
+    Private Sub dgvPasien_MouseDoubleClick(sender As Object, e As MouseEventArgs) Handles dgvPasien.MouseDoubleClick
+        Dim dep As DependencyObject = CType(e.OriginalSource, DependencyObject)
+        While dep IsNot Nothing AndAlso TypeOf dep IsNot DataGridRow
+            dep = VisualTreeHelper.GetParent(dep)
+        End While
+
+        If dep Is Nothing Then Exit Sub
+        If dgvPasien.SelectedItem Is Nothing Then Exit Sub
+
+        MainTab.SelectedItem = Form_Tab
     End Sub
 End Class
