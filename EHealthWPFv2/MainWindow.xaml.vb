@@ -1,7 +1,7 @@
 ﻿Imports System.Collections.ObjectModel
+Imports System.Globalization
 Imports System.IO
 Imports System.Text
-Imports System.Globalization
 
 Class MainWindow
     Private dataPasien As New ObservableCollection(Of Pasien)
@@ -114,6 +114,22 @@ Class MainWindow
         UpdateJumlahPasien()
     End Sub
 
+    Function IsValidPhoneNumber(phone As String) As Boolean
+        phone = phone.Trim()
+
+        For Each ch As Char In phone
+            If Not Char.IsDigit(ch) AndAlso
+           ch <> "+"c AndAlso
+           ch <> "-"c AndAlso
+           ch <> "("c AndAlso
+           ch <> ")"c Then
+                Return False
+            End If
+        Next
+
+        Return True
+    End Function
+
     Private Function ValidasiInput(ByRef pesanError As String) As Boolean
         If dataPasien.Any(Function(p) p.ID = txtID.Text.Trim()) Then
             pesanError = "ID Pasien sudah digunakan!"
@@ -181,6 +197,12 @@ Class MainWindow
 
         If String.IsNullOrWhiteSpace(txtTelepon.Text) Then
             pesanError = "Nomor telepon harus diisi!"
+            txtTelepon.Focus()
+            Return False
+        End If
+
+        If Not IsValidPhoneNumber(txtTelepon.Text) Then
+            pesanError = "Nomor telepon hanya boleh diisi Angka, Plus (+), Minus(-), dan Tanda kurung (())!"
             txtTelepon.Focus()
             Return False
         End If
@@ -373,15 +395,18 @@ Class MainWindow
             For Each pasien As Pasien In dataPasien
                 sb.AppendLine("Pasien #" & nomer)
                 sb.AppendLine(New String("-"c, 80))
-                sb.AppendLine("ID Pasien      : " & pasien.ID)
+                sb.AppendLine("ID pasien      : " & pasien.ID)
                 sb.AppendLine("Nama           : " & pasien.Nama)
-                sb.AppendLine("Tanggal Lahir  : " & pasien.TanggalLahir.ToString("dd/MM/yyyy"))
-                sb.AppendLine("Umur           : " & pasien.HitungUmur() & " tahun")
-                sb.AppendLine("Jenis Kelamin  : " & pasien.JenisKelamin)
+                sb.AppendLine("Tanggal lahir  : " & pasien.TanggalLahir.ToString("dd/MM/yyyy"))
+                sb.AppendLine("Umur           : " & pasien.HitungUmur())
+                sb.AppendLine("Jenis kelamin  : " & pasien.JenisKelamin)
+                sb.AppendLine("Berat badan    : " & pasien.BeratBadanStr())
+                sb.AppendLine("Tinggi badan   : " & pasien.TinggiBadanStr())
                 sb.AppendLine("Alamat         : " & pasien.Alamat)
                 sb.AppendLine("Telepon        : " & pasien.Telepon)
+                sb.AppendLine("Keluhan        : " & pasien.Keluhan)
                 sb.AppendLine("Diagnosa       : " & pasien.Diagnosa)
-                sb.AppendLine("Tanggal Daftar : " & pasien.TanggalDaftar.ToString("dd/MM/yyyy"))
+                sb.AppendLine("Tanggal daftar : " & pasien.TanggalDaftar.ToString("dd/MM/yyyy"))
                 sb.AppendLine()
                 nomer += 1
             Next
