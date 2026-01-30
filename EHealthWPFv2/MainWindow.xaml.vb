@@ -61,8 +61,8 @@ Class MainWindow
     End Class
 
     Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        dtpTanggalLahir.SelectedDate = New Date(2000, 1, 1)
-        dtpTanggalDaftar.SelectedDate = Date.Now
+        dtpTanggalDaftar.SelectedDate = Nothing
+        dtpTanggalLahir.SelectedDate = Nothing
 
         dgvPasien.ItemsSource = dataPasien
 
@@ -352,14 +352,16 @@ Class MainWindow
     End Sub
 
     Private Sub BersihkanForm()
-        txtID.Text = ""
-        txtNama.Text = ""
-        dtpTanggalLahir.SelectedDate = New Date(2000, 1, 1)
-        cboJenisKelamin.SelectedIndex = 0
-        txtAlamat.Text = ""
-        txtTelepon.Text = ""
-        txtDiagnosa.Text = ""
-        dtpTanggalDaftar.SelectedDate = Date.Now
+        txtID.Clear()
+        txtNama.Clear()
+        txtAlamat.Clear()
+        txtTelepon.Clear()
+        txtDiagnosa.Clear()
+
+        cboJenisKelamin.SelectedIndex = -1
+
+        dtpTanggalLahir.SelectedDate = Nothing
+        dtpTanggalDaftar.SelectedDate = Nothing
 
         txtID.IsEnabled = True
         sedangEdit = False

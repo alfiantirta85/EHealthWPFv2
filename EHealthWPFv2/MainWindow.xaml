@@ -93,14 +93,21 @@
                             <RowDefinition Height="55"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="ID Pasien:" VerticalAlignment="Center" Margin="10,0,53,0"/>
+                        <TextBlock Grid.Column="0" Text="ID pasien:" VerticalAlignment="Center" Margin="10,0,53,0"/>
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtID" VerticalAlignment="Center" Margin="0,0,10,0" Background="#FFEFE9E3"/>
 
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Nama Lengkap:" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Nama lengkap:" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="0" Grid.Column="3" x:Name="txtNama" VerticalAlignment="Center" Background="#FFEFE9E3"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Tanggal Lahir:" VerticalAlignment="Center" Margin="10,0,38,0"/>
-                        <DatePicker Grid.Row="1" Grid.Column="1" x:Name="dtpTanggalLahir" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Tanggal lahir:" VerticalAlignment="Center" Margin="10,0,38,0"/>
+                        <DatePicker 
+                            Grid.Row="1" 
+                            Grid.Column="1" 
+                            x:Name="dtpTanggalLahir" 
+                            Language="en-GB"
+                            SelectedDateFormat="Short"
+                            VerticalAlignment="Center" 
+                            Margin="0,0,10,0">
                             <DatePicker.Style>
                                 <Style TargetType="{x:Type DatePicker}">
                                     <Style.Resources>
@@ -129,7 +136,7 @@
                             </DatePicker.Style>
                         </DatePicker>
 
-                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Jenis Kelamin:" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Jenis kelamin:" VerticalAlignment="Center"/>
                         <ComboBox Grid.Row="1" Grid.Column="3" x:Name="cboJenisKelamin" VerticalAlignment="Center" Background="#FFEFE9E3">
                             <ComboBoxItem Content="Laki-laki"/>
                             <ComboBoxItem Content="Perempuan"/>
@@ -138,8 +145,15 @@
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="No. Telepon:" VerticalAlignment="Center" Margin="10,0,36,0"/>
                         <TextBox Grid.Row="2" Grid.Column="1" x:Name="txtTelepon" VerticalAlignment="Center" Margin="0,0,10,0" Background="#FFEFE9E3"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Tanggal Daftar:" VerticalAlignment="Center"/>
-                        <DatePicker Grid.Row="2" Grid.Column="3" x:Name="dtpTanggalDaftar" VerticalAlignment="Center" Background="#FFEFE9E3">
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Tanggal daftar:" VerticalAlignment="Center"/>
+                        <DatePicker 
+                            Grid.Row="2" 
+                            Grid.Column="3" 
+                            x:Name="dtpTanggalDaftar" 
+                            Language="en-GB"
+                            VerticalAlignment="Center" 
+                            Background="#FFEFE9E3"
+                        >
                             <DatePicker.Style>
                                 <Style TargetType="{x:Type DatePicker}">
                                     <Style.Resources>
@@ -213,6 +227,39 @@
                             MinHeight="100" 
                             Height="100"
                         />
+                        <TextBlock 
+                            Grid.Column="2" 
+                            Grid.Row="3"
+                            HorizontalAlignment="Left"  
+                            TextWrapping="Wrap" 
+                            Text="Tinggi badan" 
+                            VerticalAlignment="Top" 
+                            Margin="0,5,0,0"/>
+                        <TextBox 
+                            x:Name="txtTinggi" 
+                            Grid.Column="3" 
+                            Grid.Row="3"
+                            Margin="0,5,0,0" 
+                            TextWrapping="Wrap" 
+                            VerticalAlignment="Top" 
+                            MinWidth="336" 
+                            MinHeight="18" 
+                            Background="#FFEFE9E3"/>
+                        <TextBlock 
+                            Grid.Column="2"
+                            Grid.Row="3"
+                            Text="Berat badan: " 
+                            VerticalAlignment="Top" 
+                            Margin="0,35,2,0"/>
+                        <TextBox 
+                            x:Name="txtBerat" 
+                            Grid.Column="3" 
+                            Grid.Row="3" 
+                            VerticalAlignment="Top" 
+                            MinWidth="336" 
+                            MinHeight="18" 
+                            Background="#FFEFE9E3" 
+                            Margin="0,32,0,0"/>
                     </Grid>
                 </Border>
 
