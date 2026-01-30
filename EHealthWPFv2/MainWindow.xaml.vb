@@ -130,8 +130,8 @@ Class MainWindow
         Return True
     End Function
 
-    Private Function ValidasiInput(ByRef pesanError As String) As Boolean
-        If dataPasien.Any(Function(p) p.ID = txtID.Text.Trim()) Then
+    Private Function ValidasiInput(ByRef pesanError As String, ByVal isEdit As Boolean) As Boolean
+        If dataPasien.Any(Function(p) p.ID = txtID.Text.Trim()) AndAlso Not isEdit Then
             pesanError = "ID Pasien sudah digunakan!"
             txtID.Focus()
             Return False
@@ -155,6 +155,12 @@ Class MainWindow
             Return False
         End If
 
+        If dtpTanggalLahir.SelectedDate.Value > Date.Today Then
+            pesanError = "Tanggal lahir tidak valid! (Tanggal dari masa depan)"
+            dtpTanggalLahir.Focus()
+            Return False
+        End If
+
         If cboJenisKelamin.SelectedIndex = -1 Then
             pesanError = "Jenis kelamin harus di isi!"
             cboJenisKelamin.Focus()
@@ -168,7 +174,7 @@ Class MainWindow
         End If
 
         For i As Integer = 0 To txtBerat.Text.Length - 1
-            If Char.IsLetter(txtBerat.Text.Chars(i)) Then
+            If Not Char.IsDigit(txtBerat.Text.Chars(i)) Then
                 pesanError = "Berat badan tidak boleh diisi huruf!"
                 txtBerat.Focus()
                 Return False
@@ -182,7 +188,7 @@ Class MainWindow
         End If
 
         For i As Integer = 0 To txtTinggi.Text.Length - 1
-            If Char.IsLetter(txtTinggi.Text.Chars(i)) Then
+            If Not Char.IsDigit(txtTinggi.Text.Chars(i)) Then
                 pesanError = "Tinggi badan tidak boleh diisi huruf!"
                 txtTinggi.Focus()
                 Return False
@@ -202,7 +208,7 @@ Class MainWindow
         End If
 
         If Not IsValidPhoneNumber(txtTelepon.Text) Then
-            pesanError = "Nomor telepon hanya boleh diisi Angka, Plus (+), Minus(-), dan Tanda kurung (())!"
+            pesanError = "Nomor telepon hanya boleh diisi Angka, Plus (+), Minus(-), dan Tanda kurung ()!"
             txtTelepon.Focus()
             Return False
         End If
@@ -232,7 +238,7 @@ Class MainWindow
         Try
             Dim pesanError As String = ""
 
-            If Not ValidasiInput(pesanError) Then
+            If Not ValidasiInput(pesanError, False) Then
                 MessageBox.Show(pesanError, "Validasi Error",
                               MessageBoxButton.OK, MessageBoxImage.Warning)
                 Exit Sub
@@ -275,34 +281,48 @@ Class MainWindow
                 Return
             End If
 
-            Dim pasienDipilih As Pasien = CType(dgvPasien.SelectedItem, Pasien)
-            indexEdit = dataPasien.IndexOf(pasienDipilih)
+            Dim pesanError As String = ""
+            If Not ValidasiInput(pesanError, True) Then
+                txtID.IsEnabled = False
+                MessageBox.Show(pesanError, "Validasi Error",
+                              MessageBoxButton.OK, MessageBoxImage.Warning)
+                Exit Sub
+            End If
 
-            txtID.Text = pasienDipilih.ID
-            txtNama.Text = pasienDipilih.Nama
-            dtpTanggalLahir.SelectedDate = pasienDipilih.TanggalLahir
+            Dim selectedPatient As Pasien = CType(dgvPasien.SelectedItem, Pasien)
 
-            For i As Integer = 0 To cboJenisKelamin.Items.Count - 1
-                Dim item As ComboBoxItem = CType(cboJenisKelamin.Items(i), ComboBoxItem)
-                If item.Content.ToString() = pasienDipilih.JenisKelamin Then
-                    cboJenisKelamin.SelectedIndex = i
+            With selectedPatient
+                .Nama = txtNama.Text
+                .TanggalLahir = dtpTanggalLahir.SelectedDate.Value
+                .BeratBadan = Double.Parse(txtBerat.Text)
+                .TinggiBadan = Double.Parse(txtTinggi.Text)
+                .Alamat = txtAlamat.Text
+                .Telepon = txtTelepon.Text
+                .Keluhan = txtKeluhan.Text
+                .Diagnosa = txtDiagnosa.Text
+                .TanggalDaftar = dtpTanggalDaftar.SelectedDate.Value
+            End With
+
+            For Each item As ComboBoxItem In cboJenisKelamin.Items
+                If item.Content.ToString() = cboJenisKelamin.SelectedItem.ToString() Then
+                    selectedPatient.JenisKelamin = item.Content.ToString()
                     Exit For
                 End If
             Next
 
-            txtAlamat.Text = pasienDipilih.Alamat
-            txtTelepon.Text = pasienDipilih.Telepon
-            txtDiagnosa.Text = pasienDipilih.Diagnosa
-            dtpTanggalDaftar.SelectedDate = pasienDipilih.TanggalDaftar
-
-            sedangEdit = True
-            txtID.IsEnabled = False
-            btnTambah.Content = "Update Data"
-
+            MessageBox.Show("Data pasien berhasil diperbarui!", "Sukses",
+                MessageBoxButton.OK, MessageBoxImage.Information)
         Catch ex As Exception
             MessageBox.Show("Error: " & ex.Message, "Error",
                           MessageBoxButton.OK, MessageBoxImage.Error)
         End Try
+
+        SimpanDataKeFile()
+        UpdateJumlahPasien()
+        BersihkanForm()
+        MuatDataDariFile()
+
+        txtID.IsEnabled = True
     End Sub
 
     Private Sub BtnHapus_Click(sender As Object, e As RoutedEventArgs) Handles btnHapus.Click
@@ -512,7 +532,7 @@ Class MainWindow
                             Date.ParseExact(
                                 data(2),
                                 "dd/MM/yyyy",
-                                CultureInfo.InvariantCulture), ' TanggalLahir
+                                CultureInfo.InvariantCulture),          ' TanggalLahir
                             data(3),                                    ' JenisKelamin
                             Double.Parse(data(4)),                      ' BeratBadan
                             Double.Parse(data(5)),                      ' TinggiBadan
@@ -523,7 +543,7 @@ Class MainWindow
                             Date.ParseExact(
                                 data(10),
                                 "dd/MM/yyyy",
-                                CultureInfo.InvariantCulture) ' TanggalDaftar
+                                CultureInfo.InvariantCulture)           ' TanggalDaftar
                         )
 
                         dataPasien.Add(pasien)
@@ -544,6 +564,7 @@ Class MainWindow
 
         btnEdit.IsEnabled = True
         btnHapus.IsEnabled = True
+        txtID.IsEnabled = False
 
         txtID.Text = dataPasien.ID
         txtNama.Text = dataPasien.Nama
