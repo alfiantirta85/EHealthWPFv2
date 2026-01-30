@@ -298,7 +298,6 @@
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Background" Value="#FFC9B59C" />
-
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="Button">

@@ -89,56 +89,47 @@ Class MainWindow
         UpdateJumlahPasien()
     End Sub
 
-    Shared Sub ValidasiMessageBox(msg As String)
-        MessageBox.Show(
-                "Validasi form",
-                msg,
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning
-            )
-    End Sub
-
     Private Function ValidasiInput(ByRef pesanError As String) As Boolean
 
 
         If String.IsNullOrWhiteSpace(txtNama.Text) Then
-            ValidasiMessageBox("Nama pasien harus diisi!")
+            pesanError = "Nama pasien harus diisi!"
             txtNama.Focus()
             Return False
         End If
 
         If String.IsNullOrWhiteSpace(txtID.Text) Then
-            ValidasiMessageBox("ID Pasien harus diisi!")
+            pesanError = "ID Pasien harus diisi!"
             txtID.Focus()
             Return False
         End If
 
         If String.IsNullOrWhiteSpace(txtAlamat.Text) Then
-            ValidasiMessageBox("Alamat harus diisi!")
+            pesanError = "Alamat harus diisi!"
             txtAlamat.Focus()
             Return False
         End If
 
         If String.IsNullOrWhiteSpace(txtTelepon.Text) Then
-            ValidasiMessageBox("Nomor telepon harus diisi!")
+            pesanError = "Nomor telepon harus diisi!"
             txtTelepon.Focus()
             Return False
         End If
 
         If String.IsNullOrWhiteSpace(txtDiagnosa.Text) Then
-            ValidasiMessageBox("Diagnosa harus diisi!")
+            pesanError = "Diagnosa harus diisi!"
             txtDiagnosa.Focus()
             Return False
         End If
 
         If Not dtpTanggalLahir.SelectedDate.HasValue Then
-            ValidasiMessageBox("Tanggal lahir harus diisi!")
+            pesanError = "Tanggal lahir harus diisi!"
             dtpTanggalLahir.Focus()
             Return False
         End If
 
         If Not dtpTanggalDaftar.SelectedDate.HasValue Then
-            ValidasiMessageBox("Tanggal daftar harus diisi!")
+            pesanError = "Tanggal daftar harus diisi!"
             dtpTanggalDaftar.Focus()
             Return False
         End If
@@ -334,6 +325,7 @@ Class MainWindow
             sb.AppendLine("Total Pasien: " & dataPasien.Count)
             sb.AppendLine("=" & New String("="c, 80))
             sb.AppendLine()
+
 
             Dim nomer As Integer = 1
             For Each pasien As Pasien In dataPasien
