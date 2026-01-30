@@ -548,7 +548,6 @@ Class MainWindow
         txtID.Text = dataPasien.ID
         txtNama.Text = dataPasien.Nama
         dtpTanggalLahir.SelectedDate = dataPasien.TanggalLahir
-        cboJenisKelamin.SelectedItem = dataPasien.JenisKelamin
         txtBerat.Text = dataPasien.BeratBadan.ToString()
         txtTinggi.Text = dataPasien.TinggiBadan.ToString()
         txtAlamat.Text = dataPasien.Alamat
@@ -556,6 +555,13 @@ Class MainWindow
         txtKeluhan.Text = dataPasien.Keluhan
         txtDiagnosa.Text = dataPasien.Diagnosa
         dtpTanggalDaftar.SelectedDate = dataPasien.TanggalDaftar
+
+        For Each item As ComboBoxItem In cboJenisKelamin.Items
+            If item.Content.ToString() = dataPasien.JenisKelamin Then
+                cboJenisKelamin.SelectedItem = item
+                Exit For
+            End If
+        Next
 
         MainTab.SelectedItem = Form_Tab
     End Sub
