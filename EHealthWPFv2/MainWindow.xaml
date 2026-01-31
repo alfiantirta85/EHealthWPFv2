@@ -194,7 +194,7 @@
                                 TextWrapping="Wrap" 
                                 AcceptsReturn="True" 
                                 VerticalScrollBarVisibility="Auto"
-                                Height="60" Margin="0,5,10,5" Background="#FFEFE9E3" MinWidth="300"
+                                Height="60" Margin="0,5,10,5" Background="#FFEFE9E3" MinWidth="300" ScrollViewer.CanContentScroll="True"
                             />
                             <TextBlock Grid.Row="6" Grid.Column="0" Text="Diagnosa:" VerticalAlignment="Top" Margin="10,38,33,0" Height="21"/>
                             <TextBox 
@@ -202,11 +202,15 @@
                                 Grid.Column="0" 
                                 Grid.ColumnSpan="4" 
                                 x:Name="txtDiagnosa" 
-                                TextWrapping="Wrap" 
+                                TextWrapping="WrapWithOverflow" 
                                 AcceptsReturn="True" 
-                                VerticalScrollBarVisibility="Auto" Margin="10,65,0,-113" Background="#FFEFE9E3" Height="100"
+                                VerticalScrollBarVisibility="Auto" 
+                                Margin="10,65,0,-113" 
+                                Background="#FFEFE9E3" 
+                                Height="100" 
+                                ScrollViewer.CanContentScroll="True" 
                             />
-
+                            
                             <TextBlock Grid.Row="4" Grid.Column="0" Text="Keluhan pasien: " VerticalAlignment="Top" Margin="10,14,17,0" RenderTransformOrigin="0.548,0.94" Height="25" Grid.RowSpan="2">
                                 <TextBlock.RenderTransform>
                                     <TransformGroup>
@@ -222,7 +226,7 @@
                                 Grid.Column="0" 
                                 Grid.ColumnSpan="4" 
                                 x:Name="txtKeluhan" 
-                                TextWrapping="Wrap" 
+                                TextWrapping="WrapWithOverflow" 
                                 AcceptsReturn="True" 
                                 VerticalScrollBarVisibility="Auto" 
                                 Margin="10,1,0,21" 
@@ -230,7 +234,8 @@
                                 Background="#FFEFE9E3" 
                                 MinWidth="850" 
                                 MinHeight="100" 
-                                Height="100"
+                                Height="86" 
+                                ScrollViewer.CanContentScroll="True"
                             />
                             <TextBlock 
                                 Grid.Column="2" 
@@ -358,6 +363,16 @@
                             <TextBlock Text="Cari Pasien:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
                             <TextBox x:Name="txtCari" Width="300" VerticalAlignment="Center" Margin="0,0,10,0" Background="#FFEFE9E3"/>
                             <Button x:Name="btnCari" Content="Cari" Width="80" Height="30" Background="#FFC9B59C" Foreground="White" FontWeight="Bold"/>
+                            <Button x:Name="btnReset" Content="Reset" Width="80" Height="30" Background="#FFC9B59C" Foreground="White" FontWeight="Bold" RenderTransformOrigin="0.5,0.5" Margin="10,0,0,0">
+                                <Button.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform/>
+                                        <SkewTransform AngleY="0.349"/>
+                                        <RotateTransform/>
+                                        <TranslateTransform Y="-0.244"/>
+                                    </TransformGroup>
+                                </Button.RenderTransform>
+                            </Button>
                         </StackPanel>
                     </Border>
 

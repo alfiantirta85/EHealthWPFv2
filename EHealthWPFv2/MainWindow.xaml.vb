@@ -114,15 +114,19 @@ Class MainWindow
     Function IsValidPhoneNumber(phone As String) As Boolean
         phone = phone.Trim()
 
-        For Each ch As Char In phone
+        Dim i As Integer
+        Do While i < phone.Length
+            Dim ch As Char = phone(i)
             If Not Char.IsDigit(ch) AndAlso
-           ch <> "+"c AndAlso
-           ch <> "-"c AndAlso
-           ch <> "("c AndAlso
-           ch <> ")"c Then
+                ch <> "+"c AndAlso
+                ch <> "-"c AndAlso
+                ch <> "("c AndAlso
+                ch <> ")"c Then
                 Return False
             End If
-        Next
+
+            i += 1
+        Loop
 
         Return True
     End Function
@@ -184,13 +188,16 @@ Class MainWindow
             Return False
         End If
 
-        For i As Integer = 0 To txtTinggi.Text.Length - 1
-            If Not Char.IsDigit(txtTinggi.Text.Chars(i)) Then
+        Dim j As Integer = 0
+        While j <= txtTinggi.Text.Length - 1
+            If Not Char.IsDigit(txtTinggi.Text.Chars(j)) Then
                 pesanError = "Tinggi badan tidak boleh diisi huruf!"
                 txtTinggi.Focus()
                 Return False
             End If
-        Next
+
+            j += 1
+        End While
 
         If String.IsNullOrWhiteSpace(txtAlamat.Text) Then
             pesanError = "Alamat harus diisi!"
@@ -336,17 +343,20 @@ Class MainWindow
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question)
 
-            If hasil = MessageBoxResult.Yes Then
-                Dim pasienDipilih As Pasien = CType(dgvPasien.SelectedItem, Pasien)
-                dataPasien.Remove(pasienDipilih)
+            Select Case hasil
+                Case MessageBoxResult.Yes
+                    Dim pasienDipilih As Pasien = CType(dgvPasien.SelectedItem, Pasien)
+                    dataPasien.Remove(pasienDipilih)
 
-                SimpanDataKeFile()
-                UpdateJumlahPasien()
-                BersihkanForm()
+                    SimpanDataKeFile()
+                    UpdateJumlahPasien()
+                    BersihkanForm()
 
-                MessageBox.Show("Data berhasil dihapus!", "Sukses",
-                              MessageBoxButton.OK, MessageBoxImage.Information)
-            End If
+                    MessageBox.Show("Data berhasil dihapus!", "Sukses",
+                                  MessageBoxButton.OK, MessageBoxImage.Information)
+                Case MessageBoxResult.No
+                    Exit Sub
+            End Select
 
         Catch ex As Exception
             MessageBox.Show("Error: " & ex.Message, "Error",
@@ -394,6 +404,7 @@ Class MainWindow
 
     Private Sub BtnCetak_Click(sender As Object, e As RoutedEventArgs) Handles btnCetak.Click
         Try
+
             Dim namaFile As String = "Laporan_Pasien_" &
                                     Date.Now.ToString("yyyyMMdd_HHmmss") & ".txt"
             Dim direktori As String = AppDomain.CurrentDomain.BaseDirectory & "Laporan\"
@@ -451,6 +462,13 @@ Class MainWindow
         End Try
     End Sub
 
+    Private Sub btnReset_Click(sender As Object, e As RoutedEventArgs) Handles btnReset.Click
+        txtCari.Clear()
+        dgvPasien.ItemsSource = dataPasien
+        UpdateJumlahPasien()
+        MuatDataDariFile()
+    End Sub
+
     Private Sub UpdateJumlahPasien()
         lblJumlah.Text = "Total Pasien: " & dataPasien.Count
     End Sub
@@ -501,14 +519,16 @@ Class MainWindow
             Next
 
             File.WriteAllText(pathFile, sb.ToString())
-
+		Catch ex As IOException
+            MessageBox.Show("Error file: " & ex.Message, "Error",
+                              MessageBoxButton.OK, MessageBoxImage.Error)
         Catch ex As Exception
             MessageBox.Show("Error menyimpan data: " & ex.Message, "Error",
                               MessageBoxButton.OK, MessageBoxImage.Error)
         End Try
     End Sub
 
-    Private Sub MuatDataDariFile()
+	Private Sub MuatDataDariFile()
         Try
             Dim namaFile As String = "data_pasien.txt"
             Dim pathFile As String = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, namaFile)
