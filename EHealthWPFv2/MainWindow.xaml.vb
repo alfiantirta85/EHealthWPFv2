@@ -1,37 +1,24 @@
-﻿' ========================================
-' FILE: MainWindow.xaml.vb
-' APLIKASI E-HEALTH WPF VERSION
-' ========================================
-
+﻿Imports System.Collections.ObjectModel
+Imports System.Globalization
 Imports System.IO
 Imports System.Text
-Imports System.Collections.ObjectModel
 
 Class MainWindow
-    ' ========================================
-    ' DEKLARASI VARIABEL GLOBAL
-    ' ========================================
-
-    ' ObservableCollection untuk binding ke DataGrid (WPF specific)
     Private dataPasien As New ObservableCollection(Of Pasien)
-    Private sedangEdit As Boolean = False
-    Private indexEdit As Integer = -1
 
-    ' ========================================
-    ' CLASS PASIEN (dengan properties untuk binding)
-    ' ========================================
     Public Class Pasien
-        ' Properties dasar
         Public Property ID As String
         Public Property Nama As String
         Public Property TanggalLahir As Date
         Public Property JenisKelamin As String
+        Public Property BeratBadan As Double
+        Public Property TinggiBadan As Double
         Public Property Alamat As String
         Public Property Telepon As String
+        Public Property Keluhan As String
         Public Property Diagnosa As String
         Public Property TanggalDaftar As Date
 
-        ' Properties computed untuk tampilan di DataGrid
         Public ReadOnly Property TanggalLahirStr As String
             Get
                 Return TanggalLahir.ToString("dd/MM/yyyy")
@@ -46,66 +33,108 @@ Class MainWindow
 
         Public ReadOnly Property UmurStr As String
             Get
-                Return HitungUmur().ToString() & " th"
+                Return HitungUmur().ToString()
             End Get
         End Property
 
-        ' Constructor
-        Public Sub New(id As String, nama As String, tglLahir As Date,
-                       jk As String, alamat As String, telp As String,
-                       diagnosa As String, tglDaftar As Date)
-            Me.ID = id
-            Me.Nama = nama
-            Me.TanggalLahir = tglLahir
-            Me.JenisKelamin = jk
-            Me.Alamat = alamat
-            Me.Telepon = telp
-            Me.Diagnosa = diagnosa
-            Me.TanggalDaftar = tglDaftar
-        End Sub
+        Public ReadOnly Property BeratBadanStr As String
+            Get
+                Return BeratBadan.ToString()
+            End Get
+        End Property
+        Public ReadOnly Property TinggiBadanStr As String
+            Get
+                Return TinggiBadan.ToString()
+            End Get
+        End Property
 
-        ' Method menghitung umur
-        Public Function HitungUmur() As Integer
+        Public Function HitungUmur() As String
             Dim umur As Integer = Date.Now.Year - TanggalLahir.Year
+            Dim suffix As String
             If Date.Now < TanggalLahir.AddYears(umur) Then
                 umur -= 1
             End If
-            Return umur
+            suffix = "Tahun"
+
+            If umur = 0 Then
+                umur =
+                    (Today.Year - TanggalLahir.Year) * 12 + Today.Month - TanggalLahir.Month
+                If Today.Day < TanggalLahir.Day Then
+                    umur -= 1
+                End If
+                suffix = "Bulan"
+            End If
+            Return String.Join(" ", umur, suffix)
         End Function
+
+        Public Sub New(
+            id As String,
+            nama As String,
+            tglLahir As Date,
+            jk As String,
+            bb As Double,
+            tb As Double,
+            alamat As String,
+            telp As String,
+            keluhan As String,
+            diagnosa As String,
+            tglDaftar As Date
+        )
+            Me.ID = id
+            Me.Nama = nama
+            TanggalLahir = tglLahir
+            JenisKelamin = jk
+            TinggiBadan = tb
+            BeratBadan = bb
+            Me.Alamat = alamat
+            Telepon = telp
+            Me.Keluhan = keluhan
+            Me.Diagnosa = diagnosa
+            TanggalDaftar = tglDaftar
+        End Sub
+
     End Class
 
-    ' ========================================
-    ' EVENT WINDOW LOADED
-    ' ========================================
     Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        ' Set default tanggal
-        dtpTanggalLahir.SelectedDate = New Date(2000, 1, 1)
-        dtpTanggalDaftar.SelectedDate = Date.Now
+        dtpTanggalDaftar.SelectedDate = Nothing
+        dtpTanggalLahir.DisplayDateEnd = Date.Today
+        dtpTanggalLahir.SelectedDate = Nothing
 
-        ' Bind data ke DataGrid (WPF specific)
+        btnEdit.IsEnabled = False
+        btnHapus.IsEnabled = False
+
         dgvPasien.ItemsSource = dataPasien
 
-        ' Load data dari file
+        ScrollViewer.SetHorizontalScrollBarVisibility(dgvPasien, ScrollBarVisibility.Auto)
+
         MuatDataDariFile()
         UpdateJumlahPasien()
-
-        ' Event handlers untuk buttons (WPF style)
-        AddHandler btnTambah.Click, AddressOf btnTambah_Click
-        AddHandler btnEdit.Click, AddressOf btnEdit_Click
-        AddHandler btnHapus.Click, AddressOf btnHapus_Click
-        AddHandler btnCari.Click, AddressOf btnCari_Click
-        AddHandler btnBersihkan.Click, AddressOf btnBersihkan_Click
-        AddHandler btnCetak.Click, AddressOf btnCetak_Click
     End Sub
 
-    ' ========================================
-    ' VALIDASI INPUT
-    ' ========================================
+    Function IsValidPhoneNumber(phone As String) As Boolean
+        phone = phone.Trim()
 
-    Private Function ValidasiInput(ByRef pesanError As String) As Boolean
-        If String.IsNullOrWhiteSpace(txtNama.Text) Then
-            pesanError = "Nama pasien harus diisi!"
-            txtNama.Focus()
+        Dim i As Integer
+        Do While i < phone.Length
+            Dim ch As Char = phone(i)
+            If Not Char.IsDigit(ch) AndAlso
+                ch <> "+"c AndAlso
+                ch <> "-"c AndAlso
+                ch <> "("c AndAlso
+                ch <> ")"c Then
+                Return False
+            End If
+
+            i += 1
+        Loop
+
+        Return True
+    End Function
+
+    Private Function ValidasiInput(ByRef pesanError As String, ByVal isEdit As Boolean) As Boolean
+        If dataPasien.Any(Function(p) p.ID = txtID.Text.Trim()) AndAlso Not isEdit Then
+            pesanError = "ID Pasien sudah digunakan!"
+            txtID.Focus()
             Return False
         End If
 
@@ -114,6 +143,61 @@ Class MainWindow
             txtID.Focus()
             Return False
         End If
+
+        If String.IsNullOrWhiteSpace(txtNama.Text) Then
+            pesanError = "Nama pasien harus diisi!"
+            txtNama.Focus()
+            Return False
+        End If
+
+        If Not dtpTanggalLahir.SelectedDate.HasValue Then
+            pesanError = "Tanggal lahir harus diisi!"
+            dtpTanggalLahir.Focus()
+            Return False
+        End If
+
+        If dtpTanggalLahir.SelectedDate.Value > Date.Today Then
+            pesanError = "Tanggal lahir tidak valid! (Tanggal dari masa depan)"
+            dtpTanggalLahir.Focus()
+            Return False
+        End If
+
+        If cboJenisKelamin.SelectedIndex = -1 Then
+            pesanError = "Jenis kelamin harus di isi!"
+            cboJenisKelamin.Focus()
+            Return False
+        End If
+
+        If String.IsNullOrWhiteSpace(txtBerat.Text) Then
+            pesanError = "Berat badan Pasien harus diisi!"
+            txtBerat.Focus()
+            Return False
+        End If
+
+        For i As Integer = 0 To txtBerat.Text.Length - 1
+            If Not Char.IsDigit(txtBerat.Text.Chars(i)) Then
+                pesanError = "Berat badan tidak boleh diisi huruf!"
+                txtBerat.Focus()
+                Return False
+            End If
+        Next
+
+        If String.IsNullOrWhiteSpace(txtTinggi.Text) Then
+            pesanError = "Tinggi badan Pasien harus diisi!"
+            txtTinggi.Focus()
+            Return False
+        End If
+
+        Dim j As Integer = 0
+        While j <= txtTinggi.Text.Length - 1
+            If Not Char.IsDigit(txtTinggi.Text.Chars(j)) Then
+                pesanError = "Tinggi badan tidak boleh diisi huruf!"
+                txtTinggi.Focus()
+                Return False
+            End If
+
+            j += 1
+        End While
 
         If String.IsNullOrWhiteSpace(txtAlamat.Text) Then
             pesanError = "Alamat harus diisi!"
@@ -127,86 +211,61 @@ Class MainWindow
             Return False
         End If
 
+        If Not IsValidPhoneNumber(txtTelepon.Text) Then
+            pesanError = "Nomor telepon hanya boleh diisi Angka, Plus (+), Minus(-), dan Tanda kurung ()!"
+            txtTelepon.Focus()
+            Return False
+        End If
+
+        If String.IsNullOrWhiteSpace(txtKeluhan.Text) Then
+            pesanError = "Keluhan harus diisi!"
+            txtKeluhan.Focus()
+            Return False
+        End If
+
         If String.IsNullOrWhiteSpace(txtDiagnosa.Text) Then
             pesanError = "Diagnosa harus diisi!"
             txtDiagnosa.Focus()
             Return False
         End If
 
-        ' Validasi tanggal
-        If Not dtpTanggalLahir.SelectedDate.HasValue Then
-            pesanError = "Tanggal lahir harus diisi!"
-            Return False
-        End If
-
         If Not dtpTanggalDaftar.SelectedDate.HasValue Then
             pesanError = "Tanggal daftar harus diisi!"
+            dtpTanggalDaftar.Focus()
             Return False
         End If
-
-        ' Cek duplikasi ID
-        For i As Integer = 0 To dataPasien.Count - 1
-            If sedangEdit AndAlso i = indexEdit Then
-                Continue For
-            End If
-
-            If dataPasien(i).ID = txtID.Text.Trim() Then
-                pesanError = "ID Pasien sudah digunakan!"
-                txtID.Focus()
-                Return False
-            End If
-        Next
 
         Return True
     End Function
 
-    ' ========================================
-    ' BUTTON EVENT HANDLERS
-    ' ========================================
-
-    Private Sub btnTambah_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnTambah_Click(sender As Object, e As RoutedEventArgs) Handles btnTambah.Click
         Try
             Dim pesanError As String = ""
 
-            If Not ValidasiInput(pesanError) Then
+            If Not ValidasiInput(pesanError, False) Then
                 MessageBox.Show(pesanError, "Validasi Error",
                               MessageBoxButton.OK, MessageBoxImage.Warning)
-                Return
+                Exit Sub
             End If
 
-            If sedangEdit Then
-                ' Update mode
-                dataPasien(indexEdit).Nama = txtNama.Text.Trim()
-                dataPasien(indexEdit).TanggalLahir = dtpTanggalLahir.SelectedDate.Value
-                dataPasien(indexEdit).JenisKelamin = CType(cboJenisKelamin.SelectedItem, ComboBoxItem).Content.ToString()
-                dataPasien(indexEdit).Alamat = txtAlamat.Text.Trim()
-                dataPasien(indexEdit).Telepon = txtTelepon.Text.Trim()
-                dataPasien(indexEdit).Diagnosa = txtDiagnosa.Text.Trim()
-                dataPasien(indexEdit).TanggalDaftar = dtpTanggalDaftar.SelectedDate.Value
+            Dim pasienBaru As New Pasien(
+                txtID.Text.Trim(),
+                txtNama.Text.Trim(),
+                dtpTanggalLahir.SelectedDate.Value,
+                CType(cboJenisKelamin.SelectedItem, ComboBoxItem).Content.ToString(),
+                Double.Parse(txtBerat.Text),
+                Double.Parse(txtTinggi.Text),
+                txtAlamat.Text.Trim(),
+                txtTelepon.Text.Trim(),
+                txtKeluhan.Text,
+                txtDiagnosa.Text.Trim(),
+                dtpTanggalDaftar.SelectedDate.Value
+            )
 
-                ' Refresh DataGrid (WPF specific)
-                dgvPasien.Items.Refresh()
+            dataPasien.Add(pasienBaru)
 
-                MessageBox.Show("Data berhasil diupdate!", "Sukses",
-                              MessageBoxButton.OK, MessageBoxImage.Information)
-            Else
-                ' Tambah mode
-                Dim pasienBaru As New Pasien(
-                    txtID.Text.Trim(),
-                    txtNama.Text.Trim(),
-                    dtpTanggalLahir.SelectedDate.Value,
-                    CType(cboJenisKelamin.SelectedItem, ComboBoxItem).Content.ToString(),
-                    txtAlamat.Text.Trim(),
-                    txtTelepon.Text.Trim(),
-                    txtDiagnosa.Text.Trim(),
-                    dtpTanggalDaftar.SelectedDate.Value
-                )
-
-                dataPasien.Add(pasienBaru)
-
-                MessageBox.Show("Data pasien berhasil ditambahkan!", "Sukses",
-                              MessageBoxButton.OK, MessageBoxImage.Information)
-            End If
+            MessageBox.Show("Data pasien berhasil ditambahkan!", "Sukses",
+                MessageBoxButton.OK, MessageBoxImage.Information)
 
             SimpanDataKeFile()
             UpdateJumlahPasien()
@@ -218,50 +277,59 @@ Class MainWindow
         End Try
     End Sub
 
-    Private Sub btnEdit_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnEdit_Click(sender As Object, e As RoutedEventArgs) Handles btnEdit.Click
         Try
-            ' Cek apakah ada data yang dipilih (WPF style)
             If dgvPasien.SelectedItem Is Nothing Then
                 MessageBox.Show("Pilih data yang akan diedit!", "Peringatan",
                               MessageBoxButton.OK, MessageBoxImage.Warning)
                 Return
             End If
 
-            ' Ambil data yang dipilih
-            Dim pasienDipilih As Pasien = CType(dgvPasien.SelectedItem, Pasien)
-            indexEdit = dataPasien.IndexOf(pasienDipilih)
+            Dim pesanError As String = ""
+            If Not ValidasiInput(pesanError, True) Then
+                txtID.IsEnabled = False
+                MessageBox.Show(pesanError, "Validasi Error",
+                              MessageBoxButton.OK, MessageBoxImage.Warning)
+                Exit Sub
+            End If
 
-            ' Isi form dengan data yang dipilih
-            txtID.Text = pasienDipilih.ID
-            txtNama.Text = pasienDipilih.Nama
-            dtpTanggalLahir.SelectedDate = pasienDipilih.TanggalLahir
+            Dim selectedPatient As Pasien = CType(dgvPasien.SelectedItem, Pasien)
 
-            ' Set ComboBox (WPF specific)
-            For i As Integer = 0 To cboJenisKelamin.Items.Count - 1
-                Dim item As ComboBoxItem = CType(cboJenisKelamin.Items(i), ComboBoxItem)
-                If item.Content.ToString() = pasienDipilih.JenisKelamin Then
-                    cboJenisKelamin.SelectedIndex = i
+            With selectedPatient
+                .Nama = txtNama.Text
+                .TanggalLahir = dtpTanggalLahir.SelectedDate.Value
+                .BeratBadan = Double.Parse(txtBerat.Text)
+                .TinggiBadan = Double.Parse(txtTinggi.Text)
+                .Alamat = txtAlamat.Text
+                .Telepon = txtTelepon.Text
+                .Keluhan = txtKeluhan.Text
+                .Diagnosa = txtDiagnosa.Text
+                .TanggalDaftar = dtpTanggalDaftar.SelectedDate.Value
+            End With
+
+            For Each item As ComboBoxItem In cboJenisKelamin.Items
+                If item.Content.ToString() = cboJenisKelamin.SelectedItem.ToString() Then
+                    selectedPatient.JenisKelamin = item.Content.ToString()
                     Exit For
                 End If
             Next
 
-            txtAlamat.Text = pasienDipilih.Alamat
-            txtTelepon.Text = pasienDipilih.Telepon
-            txtDiagnosa.Text = pasienDipilih.Diagnosa
-            dtpTanggalDaftar.SelectedDate = pasienDipilih.TanggalDaftar
-
-            ' Set mode edit
-            sedangEdit = True
-            txtID.IsEnabled = False
-            btnTambah.Content = "Update Data"
-
+            MessageBox.Show("Data pasien berhasil diperbarui!", "Sukses",
+                MessageBoxButton.OK, MessageBoxImage.Information)
         Catch ex As Exception
             MessageBox.Show("Error: " & ex.Message, "Error",
                           MessageBoxButton.OK, MessageBoxImage.Error)
         End Try
+
+        SimpanDataKeFile()
+        UpdateJumlahPasien()
+        BersihkanForm()
+        MuatDataDariFile()
+
+        txtID.IsEnabled = True
     End Sub
 
-    Private Sub btnHapus_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnHapus_Click(sender As Object, e As RoutedEventArgs) Handles btnHapus.Click
         Try
             If dgvPasien.SelectedItem Is Nothing Then
                 MessageBox.Show("Pilih data yang akan dihapus!", "Peringatan",
@@ -269,24 +337,26 @@ Class MainWindow
                 Return
             End If
 
-            ' Konfirmasi hapus (WPF style)
             Dim hasil As MessageBoxResult = MessageBox.Show(
                 "Apakah Anda yakin ingin menghapus data ini?",
                 "Konfirmasi Hapus",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question)
 
-            If hasil = MessageBoxResult.Yes Then
-                Dim pasienDipilih As Pasien = CType(dgvPasien.SelectedItem, Pasien)
-                dataPasien.Remove(pasienDipilih)
+            Select Case hasil
+                Case MessageBoxResult.Yes
+                    Dim pasienDipilih As Pasien = CType(dgvPasien.SelectedItem, Pasien)
+                    dataPasien.Remove(pasienDipilih)
 
-                SimpanDataKeFile()
-                UpdateJumlahPasien()
-                BersihkanForm()
+                    SimpanDataKeFile()
+                    UpdateJumlahPasien()
+                    BersihkanForm()
 
-                MessageBox.Show("Data berhasil dihapus!", "Sukses",
-                              MessageBoxButton.OK, MessageBoxImage.Information)
-            End If
+                    MessageBox.Show("Data berhasil dihapus!", "Sukses",
+                                  MessageBoxButton.OK, MessageBoxImage.Information)
+                Case MessageBoxResult.No
+                    Exit Sub
+            End Select
 
         Catch ex As Exception
             MessageBox.Show("Error: " & ex.Message, "Error",
@@ -294,25 +364,22 @@ Class MainWindow
         End Try
     End Sub
 
-    Private Sub btnCari_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnCari_Click(sender As Object, e As RoutedEventArgs) Handles btnCari.Click
         Try
             Dim keyword As String = txtCari.Text.Trim().ToLower()
 
             If String.IsNullOrWhiteSpace(keyword) Then
-                ' Tampilkan semua data
                 dgvPasien.ItemsSource = dataPasien
                 UpdateJumlahPasien()
                 Return
             End If
 
-            ' Filter data (LINQ - WPF specific)
             Dim hasilCari = From p In dataPasien
                             Where p.ID.ToLower().Contains(keyword) OrElse
                                   p.Nama.ToLower().Contains(keyword) OrElse
                                   p.Diagnosa.ToLower().Contains(keyword)
                             Select p
 
-            ' Bind hasil pencarian
             dgvPasien.ItemsSource = hasilCari.ToList()
             lblJumlah.Text = "Ditemukan: " & hasilCari.Count() & " data"
 
@@ -322,15 +389,22 @@ Class MainWindow
         End Try
     End Sub
 
-    Private Sub btnBersihkan_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnBersihkan_Click(sender As Object, e As RoutedEventArgs) Handles btnBersihkan.Click
+        txtID.IsEnabled = True
+        dgvPasien.UnselectAll()
+        dgvPasien.UnselectAllCells()
         BersihkanForm()
-        txtCari.Text = ""
+        txtCari.Clear()
         dgvPasien.ItemsSource = dataPasien
         UpdateJumlahPasien()
+        MuatDataDariFile()
+        MessageBox.Show("Form telah dibersihkan!", "Sukses",
+                              MessageBoxButton.OK, MessageBoxImage.Information)
     End Sub
 
-    Private Sub btnCetak_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub BtnCetak_Click(sender As Object, e As RoutedEventArgs) Handles btnCetak.Click
         Try
+
             Dim namaFile As String = "Laporan_Pasien_" &
                                     Date.Now.ToString("yyyyMMdd_HHmmss") & ".txt"
             Dim direktori As String = AppDomain.CurrentDomain.BaseDirectory & "Laporan\"
@@ -350,19 +424,23 @@ Class MainWindow
             sb.AppendLine("=" & New String("="c, 80))
             sb.AppendLine()
 
+
             Dim nomer As Integer = 1
             For Each pasien As Pasien In dataPasien
                 sb.AppendLine("Pasien #" & nomer)
                 sb.AppendLine(New String("-"c, 80))
-                sb.AppendLine("ID Pasien      : " & pasien.ID)
+                sb.AppendLine("ID pasien      : " & pasien.ID)
                 sb.AppendLine("Nama           : " & pasien.Nama)
-                sb.AppendLine("Tanggal Lahir  : " & pasien.TanggalLahir.ToString("dd/MM/yyyy"))
-                sb.AppendLine("Umur           : " & pasien.HitungUmur() & " tahun")
-                sb.AppendLine("Jenis Kelamin  : " & pasien.JenisKelamin)
+                sb.AppendLine("Tanggal lahir  : " & pasien.TanggalLahir.ToString("dd/MM/yyyy"))
+                sb.AppendLine("Umur           : " & pasien.HitungUmur())
+                sb.AppendLine("Jenis kelamin  : " & pasien.JenisKelamin)
+                sb.AppendLine("Berat badan    : " & pasien.BeratBadanStr())
+                sb.AppendLine("Tinggi badan   : " & pasien.TinggiBadanStr())
                 sb.AppendLine("Alamat         : " & pasien.Alamat)
                 sb.AppendLine("Telepon        : " & pasien.Telepon)
+                sb.AppendLine("Keluhan        : " & pasien.Keluhan)
                 sb.AppendLine("Diagnosa       : " & pasien.Diagnosa)
-                sb.AppendLine("Tanggal Daftar : " & pasien.TanggalDaftar.ToString("dd/MM/yyyy"))
+                sb.AppendLine("Tanggal daftar : " & pasien.TanggalDaftar.ToString("dd/MM/yyyy"))
                 sb.AppendLine()
                 nomer += 1
             Next
@@ -384,35 +462,37 @@ Class MainWindow
         End Try
     End Sub
 
-    ' ========================================
-    ' FUNGSI HELPER
-    ' ========================================
+    Private Sub btnReset_Click(sender As Object, e As RoutedEventArgs) Handles btnReset.Click
+        txtCari.Clear()
+        dgvPasien.ItemsSource = dataPasien
+        UpdateJumlahPasien()
+        MuatDataDariFile()
+    End Sub
 
     Private Sub UpdateJumlahPasien()
         lblJumlah.Text = "Total Pasien: " & dataPasien.Count
     End Sub
 
     Private Sub BersihkanForm()
-        txtID.Text = ""
-        txtNama.Text = ""
-        dtpTanggalLahir.SelectedDate = New Date(2000, 1, 1)
-        cboJenisKelamin.SelectedIndex = 0
-        txtAlamat.Text = ""
-        txtTelepon.Text = ""
-        txtDiagnosa.Text = ""
-        dtpTanggalDaftar.SelectedDate = Date.Now
+        txtID.Clear()
+        txtNama.Clear()
+        txtBerat.Clear()
+        txtTinggi.Clear()
+        txtAlamat.Clear()
+        txtTelepon.Clear()
+        txtKeluhan.Clear()
+        txtDiagnosa.Clear()
+
+        cboJenisKelamin.SelectedIndex = -1
+
+        dtpTanggalLahir.SelectedDate = Nothing
+        dtpTanggalDaftar.SelectedDate = Nothing
 
         txtID.IsEnabled = True
-        sedangEdit = False
-        indexEdit = -1
         btnTambah.Content = "Tambah Data"
 
         txtNama.Focus()
     End Sub
-
-    ' ========================================
-    ' FILE I/O
-    ' ========================================
 
     Private Sub SimpanDataKeFile()
         Try
@@ -422,23 +502,33 @@ Class MainWindow
             Dim sb As New StringBuilder()
 
             For Each p As Pasien In dataPasien
-                sb.AppendLine(String.Join("|",
-                    p.ID, p.Nama,
-                    p.TanggalLahir.ToString("yyyy-MM-dd"),
-                    p.JenisKelamin, p.Alamat, p.Telepon, p.Diagnosa,
-                    p.TanggalDaftar.ToString("yyyy-MM-dd")
-                ))
+                sb.AppendLine(
+                        String.Join("|",
+                        p.ID,
+                        p.Nama,
+                        p.TanggalLahir.ToString("dd/MM/yyyy"),
+                        p.JenisKelamin,
+                        p.BeratBadan,
+                        p.TinggiBadan,
+                        p.Alamat,
+                        p.Telepon,
+                        p.Keluhan,
+                        p.Diagnosa,
+                        p.TanggalDaftar.ToString("dd/MM/yyyy")
+                    ))
             Next
 
             File.WriteAllText(pathFile, sb.ToString())
-
+		Catch ex As IOException
+            MessageBox.Show("Error file: " & ex.Message, "Error",
+                              MessageBoxButton.OK, MessageBoxImage.Error)
         Catch ex As Exception
             MessageBox.Show("Error menyimpan data: " & ex.Message, "Error",
-                          MessageBoxButton.OK, MessageBoxImage.Error)
+                              MessageBoxButton.OK, MessageBoxImage.Error)
         End Try
     End Sub
 
-    Private Sub MuatDataDariFile()
+	Private Sub MuatDataDariFile()
         Try
             Dim namaFile As String = "data_pasien.txt"
             Dim pathFile As String = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, namaFile)
@@ -455,16 +545,26 @@ Class MainWindow
                 If Not String.IsNullOrWhiteSpace(line) Then
                     Dim data() As String = line.Split("|"c)
 
-                    If data.Length >= 8 Then
+                    If data.Length <> 11 Then Continue For
+                    If data.Length >= 11 Then
                         Dim pasien As New Pasien(
-                            data(0),
-                            data(1),
-                            Date.Parse(data(2)),
-                            data(3),
-                            data(4),
-                            data(5),
-                            data(6),
-                            Date.Parse(data(7))
+                            data(0),                                    ' ID
+                            data(1),                                    ' Nama
+                            Date.ParseExact(
+                                data(2),
+                                "dd/MM/yyyy",
+                                CultureInfo.InvariantCulture),          ' TanggalLahir
+                            data(3),                                    ' JenisKelamin
+                            Double.Parse(data(4)),                      ' BeratBadan
+                            Double.Parse(data(5)),                      ' TinggiBadan
+                            data(6),                                    ' Alamat
+                            data(7),                                    ' Telepon
+                            data(8),                                    ' Keluhan
+                            data(9),                                    ' Diagnosa
+                            Date.ParseExact(
+                                data(10),
+                                "dd/MM/yyyy",
+                                CultureInfo.InvariantCulture)           ' TanggalDaftar
                         )
 
                         dataPasien.Add(pasien)
@@ -474,8 +574,37 @@ Class MainWindow
 
         Catch ex As Exception
             MessageBox.Show("Error memuat data: " & ex.Message, "Error",
-                          MessageBoxButton.OK, MessageBoxImage.Error)
+                              MessageBoxButton.OK, MessageBoxImage.Error)
         End Try
     End Sub
 
+    Private Sub dgvPasien_SelectionChanged(sender As Object, e As EventArgs) Handles dgvPasien.SelectionChanged
+        If dgvPasien.SelectedItem Is Nothing Then Exit Sub
+
+        Dim dataPasien As Pasien = CType(dgvPasien.SelectedItem, Pasien)
+
+        btnEdit.IsEnabled = True
+        btnHapus.IsEnabled = True
+        txtID.IsEnabled = False
+
+        txtID.Text = dataPasien.ID
+        txtNama.Text = dataPasien.Nama
+        dtpTanggalLahir.SelectedDate = dataPasien.TanggalLahir
+        txtBerat.Text = dataPasien.BeratBadan.ToString()
+        txtTinggi.Text = dataPasien.TinggiBadan.ToString()
+        txtAlamat.Text = dataPasien.Alamat
+        txtTelepon.Text = dataPasien.Telepon.ToString()
+        txtKeluhan.Text = dataPasien.Keluhan
+        txtDiagnosa.Text = dataPasien.Diagnosa
+        dtpTanggalDaftar.SelectedDate = dataPasien.TanggalDaftar
+
+        For Each item As ComboBoxItem In cboJenisKelamin.Items
+            If item.Content.ToString() = dataPasien.JenisKelamin Then
+                cboJenisKelamin.SelectedItem = item
+                Exit For
+            End If
+        Next
+
+        MainTab.SelectedItem = Form_Tab
+    End Sub
 End Class
