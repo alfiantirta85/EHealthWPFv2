@@ -5,9 +5,6 @@ Imports System.Text
 
 Class MainWindow
     Private dataPasien As New ObservableCollection(Of Pasien)
-    Private sedangEdit As Boolean = False
-    Private indexEdit As Integer = -1
-
 
     Public Class Pasien
         Public Property ID As String
@@ -67,7 +64,7 @@ Class MainWindow
                 End If
                 suffix = "Bulan"
             End If
-                Return String.Join(" ", umur, suffix)
+            Return String.Join(" ", umur, suffix)
         End Function
 
         Public Sub New(
@@ -383,6 +380,9 @@ Class MainWindow
     End Sub
 
     Private Sub BtnBersihkan_Click(sender As Object, e As RoutedEventArgs) Handles btnBersihkan.Click
+        txtID.IsEnabled = True
+        dgvPasien.UnselectAll()
+        dgvPasien.UnselectAllCells()
         BersihkanForm()
         txtCari.Text = ""
         dgvPasien.ItemsSource = dataPasien
@@ -468,8 +468,6 @@ Class MainWindow
         dtpTanggalDaftar.SelectedDate = Nothing
 
         txtID.IsEnabled = True
-        sedangEdit = False
-        indexEdit = -1
         btnTambah.Content = "Tambah Data"
 
         txtNama.Focus()
