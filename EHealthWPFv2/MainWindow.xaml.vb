@@ -384,9 +384,12 @@ Class MainWindow
         dgvPasien.UnselectAll()
         dgvPasien.UnselectAllCells()
         BersihkanForm()
-        txtCari.Text = ""
+        txtCari.Clear()
         dgvPasien.ItemsSource = dataPasien
         UpdateJumlahPasien()
+        MuatDataDariFile()
+        MessageBox.Show("Form telah dibersihkan!", "Sukses",
+                              MessageBoxButton.OK, MessageBoxImage.Information)
     End Sub
 
     Private Sub BtnCetak_Click(sender As Object, e As RoutedEventArgs) Handles btnCetak.Click
